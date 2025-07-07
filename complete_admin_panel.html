@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maude Website Editor - Admin Panel</title>
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Authentication Container Styles */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .auth-form {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .auth-title {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 28px;
+            font-weight: 300;
+        }
+
+        .auth-subtitle {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .auth-footer a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.9);
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        /* Authentication Button */
+        .auth-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .auth-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Message Styles */
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        /* Security Info Panel */
+        .security-info {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(52, 152, 219, 0.1);
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+        }
+
+        .security-info h4 {
+            color: #2980b9;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .security-info ul {
+            color: #34495e;
+            font-size: 14px;
+            line-height: 1.6;
+            list-style: none;
+            padding: 0;
+        }
+
+        .security-info li {
+            margin-bottom: 5px;
+        }
+
+        /* Main Editor Styles */
+        .editor-container {
+            display: none;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .admin-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .admin-title {
+            font-size: 24px;
+            font-weight: 300;
+        }
+
+        .admin-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .session-info {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Editor Section Styles */
+        .editor-section {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        /* Gallery Item Styles */
+        .gallery-item {
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #f8f9fa;
+        }
+
+        .gallery-item h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        /* Button Styles */
+        .btn {
+            background: #3498db;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: #2980b9;
+        }
+
+        .btn-success {
+            background: #27ae60;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .btn-warning {
+            background: #f39c12;
+        }
+
+        .btn-warning:hover {
+            background: #e67e22;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        /* Code Output Styles */
+        .code-output {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        /* Instruction and Warning Styles */
+        .instructions {
+            background: #e8f5e8;
+            padding: 20px;
+            border-radius: 6px;
+            border-left: 4px solid #27ae60;
+            margin-bottom: 20px;
+        }
+
+        .warning {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #ffc107;
+            margin-bottom: 20px;
+        }
+
+        /* Layout Helpers */
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+            
+            .admin-nav {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .auth-form {
+                padding: 30px 20px;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            .editor-section {
+                padding: 20px;
+            }
+        }
+
+        /* Animation for smooth transitions */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(-10px); }
+            20% { opacity: 1; transform: translateY(0); }
+            80% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Access Request Form -->
+    <div id="signupContainer" class="auth-container">
+        <form id="signupForm" class="auth-form">
+            <h2 class="auth-title">🎨 Request Editor Access</h2>
+            <p class="auth-subtitle">Maude Website Content Editor</p>
+            
+            <div id="signupMessage" class="message" style="display: none;"></div>
+            
+            <div class="form-group">
+                <label for="requestName">Full Name:</label>
+                <input type="text" id="requestName" required autocomplete="name">
+            </div>
+            
+            <div class="form-group">
+                <label for="requestEmail">Email Address:</label>
+                <input type="email" id="requestEmail" required autocomplete="email">
+            </div>
+            
+            <div class="form-group">
+                <label for="requestReason">Reason for Access:</label>
+                <textarea id="requestReason" required placeholder="Please explain why you need access to edit Maude's website..."></textarea>
+            </div>
+            
+            <button type="submit" id="signupBtn" class="auth-btn">
+                📧 Send Access Request
+            </button>
+            
+            <p class="auth-footer">
+                Already have access? <a href="#" onclick="showLogin()">Login here</a>
+            </p>
+            
+            <div class="security-info">
+                <h4>🔐 Security Process</h4>
+                <ul>
+                    <li>✅ Request sent directly to Maude</li>
+                    <li>✅ Google Authenticator verification required</li>
+                    <li>✅ Secure session management</li>
+                    <li>✅ Automatic access expiry</li>
+                </ul>
+            </div>
+        </form>
+    </div>
+
+    <!-- Login Form -->
+    <div id="loginContainer" class="auth-container" style="display: none;">
+        <form id="loginForm" class="auth-form">
+            <h2 class="auth-title">🔐 Editor Login</h2>
+            <p class="auth-subtitle">Maude Website Content Editor</p>
+            
+            <div id="loginMessage" class="message" style="display: none;"></div>
+            
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" required autocomplete="username">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" required autocomplete="current-password">
+            </div>
+            
+            <div class="form-group">
+                <label for="authCode">Google Authenticator Code:</label>
+                <input type="text" id="authCode" required maxlength="6" placeholder="000000" pattern="[0-9]{6}">
+                <small style="color: #666; font-size: 12px;">Enter the 6-digit code from your authenticator app</small>
+            </div>
+            
+            <button type="submit" id="loginBtn" class="auth-btn">
+                🚀 Access Editor
+            </button>
+            
+            <p class="auth-footer">
+                Need access? <a href="#" onclick="showSignup()">Request access here</a>
+            </p>
+            
+            <div class="security-info">
+                <h4>🔐 Demo Login (Testing Only)</h4>
+                <ul>
+                    <li><strong>Username:</strong> maude</li>
+                    <li><strong>Password:</strong> secure123</li>
+                    <li><strong>Auth Code:</strong> 123456</li>
+                </ul>
+            </div>
+        </form>
+    </div>
+
+    <!-- Main Editor Interface -->
+    <div id="editorContainer" class="editor-container">
+        <header class="admin-header">
+            <nav class="admin-nav">
+                <div class="admin-title">🎨 Maude Website Editor</div>
+                <div class="admin-controls">
+                    <span id="sessionInfo" class="session-info"></span>
+                    <button id="logoutBtn" class="logout-btn">Logout</button>
+                </div>
+            </nav>
+        </header>
+
+        <div class="container">
+            <!-- Artist Information Section -->
+            <section class="editor-section">
+                <h2 class="section-title">🎭 Artist Information</h2>
+                <div class="instructions">
+                    <strong>Instructions:</strong> Update the main artist name and subtitle that appears on the homepage.
+                </div>
+                
+                <div class="form-group">
+                    <label for="artist-name">Artist Name:</label>
+                    <input type="text" id="artist-name" placeholder="Enter artist name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="artist-subtitle">Artist Subtitle/Description:</label>
+                    <input type="text" id="artist-subtitle" placeholder="Enter artist subtitle">
+                </div>
+            </section>
+
+            <!-- About Section -->
+            <section class="editor-section">
+                <h2 class="section-title">📝 About Section</h2>
+                <div class="instructions">
+                    <strong>Instructions:</strong> Edit the artist's biography and artistic statement.
+                </div>
+                
+                <div class="form-group">
+                    <label for="about-paragraph1">About Paragraph 1:</label>
+                    <textarea id="about-paragraph1" placeholder="Enter first paragraph of about section"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="about-paragraph2">About Paragraph 2:</label>
+                    <textarea id="about-paragraph2" placeholder="Enter second paragraph of about section"></textarea>
+                </div>
+            </section>
+
+            <!-- Gallery Management Section -->
+            <section class="editor-section">
+                <h2 class="section-title">🖼️ Gallery Management</h2>
+                <div class="instructions">
+                    <strong>Instructions:</strong> Add, edit, or remove artworks from the gallery. 
+                    Image files should be uploaded to the 'images' folder on your server.
+                </div>
+                
+                <div id="gallery-items">
+                    <!-- Gallery items will be dynamically loaded here -->
+                </div>
+                
+                <button class="btn btn-success" onclick="addArtwork()">+ Add New Artwork</button>
+            </section>
+
+            <!-- Code Generation Section -->
+            <section class="editor-section">
+                <h2 class="section-title">💻 Generate Website Code</h2>
+                <div class="warning">
+                    <strong>Important:</strong> After generating the code, you'll need to:
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li>Save the HTML code as 'index.html'</li>
+                        <li>Upload your images to an 'images' folder</li>
+                        <li>Include the 'stylesheet.css' file for styling</li>
+                    </ul>
+                </div>
+                
+                <button class="btn btn-warning" onclick="generateCode()">🚀 Generate HTML Code</button>
+                
+                <div id="generate-success" class="message" style="display: none;"></div>
+                
+                <div id="code-output" class="code-output" style="display: none;"></div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        // Admin Website Editor - Security & Functionality
+        // This system requires server-side implementation for full security
+
+        // Configuration
+        const CONFIG = {
+            sessionTimeout: 30 * 60 * 1000, // 30 minutes
+            maxLoginAttempts: 5,
+            lockoutTime: 15 * 60 * 1000, // 15 minutes
+            maudeEmail: 'maude@example.com' // Update with Maude's actual email
+        };
+
+        // Security State Management
+        let securityState = {
+            isAuthenticated: false,
+            currentUser: null,
+            loginAttempts: 0,
+            lockoutUntil: null,
+            sessionStart: null,
+            lastActivity: null,
+            accessRequests: [] // In production, this would be server-side
+        };
+
+        // Simulated user database (In production, this would be server-side)
+        let authorizedUsers = {
+            // Demo user for testing - remove in production
+            'maude': { 
+                password: 'secure123', // In production, this would be hashed
+                totpSecret: 'JBSWY3DPEHPK3PXP', // Demo secret
+                approved: true,
+                role: 'admin'
+            }
+        };
+
+        // Content storage (in production, this would be server-side)
+        let websiteContent = {
+            artistName: 'MAUDE',
+            artistSubtitle: 'Abstract Expressionist',
+            aboutParagraph1: 'Through the interplay of light and shadow, Maude explores the boundaries between consciousness and void. Her abstract expressionist works emerge from a dialogue with emptiness, where charcoal becomes whisper, silver becomes breath, and white becomes the space between thoughts.',
+            aboutParagraph2: 'Each piece is a meditation on the essential—stripping away the unnecessary to reveal the profound truths that exist in the spaces we often overlook. Her work invites contemplation, demanding nothing but offering everything to those willing to listen with their eyes.',
+            artworks: [
+                { title: 'Convergence I', image: 'convergence-i.jpg' },
+                { title: 'Elemental', image: 'elemental.jpg' },
+                { title: 'Void Whispers', image: 'void-whispers.jpg' },
+                { title: 'Monochrome Dreams', image: 'monochrome-dreams.jpg' },
+                { title: 'Silent Storms', image: 'silent-storms.jpg' },
+                { title: 'Between Lines', image: 'between-lines.jpg' }
+            ]
+        };
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            clearSession();
+            setupEventListeners();
+            setupActivityMonitoring();
+            setInterval(checkSessionTimeout, 60000); // Check every minute
+            showSignup(); // Start with signup form
+            loadSavedContent();
+        }
+
+        function setupEventListeners() {
+            // Signup form
+            const signupForm = document.getElementById('signupForm');
+            if (signupForm) {
+                signupForm.addEventListener('submit', handleSignupRequest);
+            }
+            
+            // Login form
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', handleLogin);
+            }
+            
+            // Logout
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', handleLogout);
+            }
+
+            // Auto-save content changes
+            setupAutoSave();
+        }
+
+        function setupAutoSave() {
+            const inputs = document.querySelectorAll('#editorContainer input, #editorContainer textarea');
+            inputs.forEach(input => {
+                input.addEventListener('input', debounce(saveContent, 2000));
+            });
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        function setupActivityMonitoring() {
+            document.addEventListener('mousemove', updateActivity);
+            document.addEventListener('keypress', updateActivity);
+            document.addEventListener('click', updateActivity);
+        }
+
+        function updateActivity() {
+            if (securityState.isAuthenticated) {
+                securityState.lastActivity = Date.now();
+            }
+        }
+
+        // Access Request System
+        function handleSignupRequest(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('requestName').value.trim();
+            const email = document.getElementById('requestEmail').value.trim();
+            const reason = document.getElementById('requestReason').value.trim();
+            
+            if (!name || !email || !reason) {
+                showMessage('signupMessage', 'Please fill in all fields.', 'error');
+                return;
+            }
+            
+            // Validate email format
+            if (!isValidEmail(email)) {
+                showMessage('signupMessage', 'Please enter a valid email address.', 'error');
+                return;
+            }
+            
+            // Create access request
+            const request = {
+                id: Date.now(),
+                name: name,
+                email: email,
+                reason: reason,
+                timestamp: new Date().toISOString(),
+                status: 'pending'
+            };
+            
+            // Store request (in production, send to server)
+            securityState.accessRequests.push(request);
+            
+            // Send email to Maude (simulated)
+            sendAccessRequestEmail(request);
+            
+            // Show success message
+            showMessage('signupMessage', 
+                `Access request sent successfully! Maude will review your request and contact you at ${email} if approved.`, 
+                'success'
+            );
+            
+            // Clear form
+            document.getElementById('signupForm').reset();
+        }
+
+        function sendAccessRequestEmail(request) {
+            // In production, this would be a server-side email service
+            const emailContent = `
+                New Website Editor Access Request
+                
+                Name: ${request.name}
+                Email: ${request.email}
+                Reason: ${request.reason}
+                Time: ${new Date(request.timestamp).toLocaleString()}
+                
+                Request ID: ${request.id}
+            `;
+            
+            // Simulate email sending
+            console.log('Email sent to Maude:', emailContent);
+        }
+
+        // Authentication System
+        function handleLogin(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const authCode = document.getElementById('authCode').value.trim();
+            
+            // Check if account is locked
+            if (securityState.lockoutUntil && Date.now() < securityState.lockoutUntil) {
+                const remainingTime = Math.ceil((securityState.lockoutUntil - Date.now()) / 60000);
+                showMessage('loginMessage', `Account locked. Try again in ${remainingTime} minutes.`, 'error');
+                return;
+            }
+            
+            // Validate input
+            if (!username || !password || !authCode) {
+                showMessage('loginMessage', 'Please fill in all fields.', 'error');
+                return;
+            }
+            
+            if (authCode.length !== 6 || !/^\d{6}$/.test(authCode)) {
+                showMessage('loginMessage', 'Google Authenticator code must be 6 digits.', 'error');
+                return;
+            }
+            
+            // Check credentials
+            if (!authorizedUsers[username]) {
+                recordFailedLogin();
+                showMessage('loginMessage', 'Invalid credentials.', 'error');
+                return;
+            }
+            
+            const user = authorizedUsers[username];
+            
+            // Verify password (in production, compare with hash)
+            if (user.password !== password) {
+                recordFailedLogin();
+                showMessage('loginMessage', 'Invalid credentials.', 'error');
+                return;
+            }
+            
+            // Simulate TOTP verification (in production, verify actual TOTP)
+            if (!verifyTOTP(user.totpSecret, authCode)) {
+                recordFailedLogin();
+                showMessage('loginMessage', 'Invalid authenticator code.', 'error');
+                return;
+            }
+            
+            // Successful login
+            authenticateUser(username, user);
+        }
+
+        function verifyTOTP(secret, token) {
+            // Simplified TOTP verification for demo
+            // In production, use proper TOTP library
+            const validCodes = ['123456', '654321', '111111']; // Demo codes
+            return validCodes.includes(token);
+        }
+
+        function recordFailedLogin() {
+            securityState.loginAttempts++;
+            
+            if (securityState.loginAttempts >= CONFIG.maxLoginAttempts) {
+                securityState.lockoutUntil = Date.now() + CONFIG.lockoutTime;
+                showMessage('loginMessage', 
+                    `Too many failed attempts. Account locked for ${CONFIG.lockoutTime / 60000} minutes.`, 
+                    'error'
+                );
+            }
+        }
+
+        function authenticateUser(username, user) {
+            securityState.isAuthenticated = true;
+            securityState.currentUser = username;
+            securityState.sessionStart = Date.now();
+            securityState.lastActivity = Date.now();
+            securityState.loginAttempts = 0; // Reset failed attempts
+            securityState.lockoutUntil = null;
+            
+            showEditor();
+            updateSessionInfo();
+            loadContentToEditor();
+            
+            showMessage('loginMessage', 'Login successful! Redirecting...', 'success');
+            setTimeout(() => {
+                document.getElementById('loginMessage').style.display = 'none';
+            }, 2000);
+        }
+
+        function handleLogout() {
+            if (confirm('Are you sure you want to logout? Any unsaved changes will be lost.')) {
+                clearSession();
+                showSignup();
+            }
+        }
+
+        function clearSession() {
+            securityState.isAuthenticated = false;
+            securityState.currentUser = null;
+            securityState.sessionStart = null;
+            securityState.lastActivity = null;
+        }
+
+        function checkSessionTimeout() {
+            if (!securityState.isAuthenticated) return;
+            
+            const now = Date.now();
+            const timeSinceActivity = now - securityState.lastActivity;
+            
+            if (timeSinceActivity > CONFIG.sessionTimeout) {
+                alert('Session expired due to inactivity. Please login again.');
+                clearSession();
+                showSignup();
+            }
+        }
+
+        function updateSessionInfo() {
+            const sessionInfo = document.getElementById('sessionInfo');
+            if (sessionInfo && securityState.isAuthenticated) {
+                const sessionDuration = Math.floor((Date.now() - securityState.sessionStart) / 60000);
+                sessionInfo.textContent = `Logged in as: ${securityState.currentUser} (${sessionDuration}m)`;
+            }
+        }
+
+        // UI Navigation Functions
+        function showSignup() {
+            document.getElementById('signupContainer').style.display = 'flex';
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('editorContainer').style.display = 'none';
+        }
+
+        function showLogin() {
+            document.getElementById('signupContainer').style.display = 'none';
+            document.getElementById('loginContainer').style.display = 'flex';
+            document.getElementById('editorContainer').style.display = 'none';
+        }
+
+        function showEditor() {
+            document.getElementById('signupContainer').style.display = 'none';
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('editorContainer').style.display = 'block';
+        }
+
+        // Content Management Functions
+        function loadSavedContent() {
+            // In a real application, this would load from server
+            // For demo purposes, we use the default content
+        }
+
+        function saveContent() {
+            if (!securityState.isAuthenticated) return;
+            
+            // Show save indicator
+            showSaveIndicator();
+        }
